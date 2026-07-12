@@ -34,7 +34,7 @@ php artisan serve # في نافذة أخرى
 
 ## الستاك التقني
 
-- Laravel 11 (PHP 8.2+)
+- Laravel 11 (PHP 8.4+)
 - Inertia.js + Vue 3 (Composition API) + Vite
 - Tailwind CSS (مع دعم RTL كامل للعربية)
 - MySQL (إنتاج) / SQLite (تطوير محلي)

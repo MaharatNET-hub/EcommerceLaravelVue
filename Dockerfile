@@ -13,7 +13,7 @@ COPY public public
 COPY --from=vendor /app/vendor/tightenco/ziggy ./vendor/tightenco/ziggy
 RUN npm run build
 
-FROM php:8.3-fpm-alpine AS app
+FROM php:8.4-fpm-alpine AS app
 
 RUN apk add --no-cache \
         nginx \
