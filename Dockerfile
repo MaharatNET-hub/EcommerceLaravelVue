@@ -1,3 +1,9 @@
+FROM composer:2 AS vendor
+WORKDIR /app
+COPY database database
+COPY composer.json composer.lock ./
+RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist --no-progress
+
 FROM node:20-alpine AS assets
 WORKDIR /app
 COPY package.json package-lock.json ./
@@ -5,13 +11,8 @@ RUN npm ci
 COPY resources resources
 COPY vite.config.js jsconfig.json postcss.config.js tailwind.config.js ./
 COPY public public
+COPY --from=vendor /app/vendor/tightenco/ziggy ./vendor/tightenco/ziggy
 RUN npm run build
-
-FROM composer:2 AS vendor
-WORKDIR /app
-COPY database database
-COPY composer.json composer.lock ./
-RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist --no-progress
 
 FROM php:8.3-fpm-alpine AS app
 
