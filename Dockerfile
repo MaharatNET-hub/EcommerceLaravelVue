@@ -1,8 +1,7 @@
 FROM composer:2 AS vendor
 WORKDIR /app
-COPY database database
-COPY composer.json composer.lock ./
-RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist --no-progress
+COPY . .
+RUN composer install --no-dev --no-scripts --optimize-autoloader --classmap-authoritative --prefer-dist --no-progress
 
 FROM node:20-alpine AS assets
 WORKDIR /app
@@ -42,13 +41,10 @@ RUN { \
 
 WORKDIR /var/www/html
 
-COPY . .
-COPY --from=vendor /app/vendor ./vendor
-COPY --from=vendor /usr/bin/composer /usr/bin/composer
+COPY --from=vendor /app .
 COPY --from=assets /app/public/build ./public/build
 
-RUN composer dump-autoload --optimize --no-dev --classmap-authoritative \
-    && mkdir -p storage/framework/{cache,sessions,views} storage/logs bootstrap/cache \
+RUN mkdir -p storage/framework/{cache,sessions,views} storage/logs bootstrap/cache \
     && chown -R www-data:www-data storage bootstrap/cache
 
 COPY docker/nginx.conf /etc/nginx/nginx.conf
