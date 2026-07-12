@@ -19,6 +19,8 @@ RUN apk add --no-cache \
         nginx \
         supervisor \
         bash \
+        sqlite \
+        sqlite-dev \
         libpng-dev \
         libzip-dev \
         icu-dev \
@@ -26,7 +28,7 @@ RUN apk add --no-cache \
         freetype-dev \
         libjpeg-turbo-dev \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install -j$(nproc) pdo_mysql bcmath gd intl zip opcache
+    && docker-php-ext-install -j$(nproc) pdo_mysql pdo_sqlite bcmath gd intl zip opcache
 
 RUN { \
         echo 'opcache.enable=1'; \

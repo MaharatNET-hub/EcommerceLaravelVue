@@ -1,0 +1,90 @@
+databases: []
+
+# Production setup: persistent disks for the database and uploaded images,
+# so nothing is lost on redeploys or restarts. Requires a card on file on
+# Render (paid "Starter" instances, prorated by the second) because free
+# instances don't support persistent disks, and private services (like the
+# self-hosted MySQL below) aren't available on the free plan at all.
+#
+# To use this instead of the free render.yaml: rename this file to
+# render.yaml (or point Render's Blueprint Path to render.paid.yaml) and
+# redeploy the Blueprint.
+services:
+  # Render has no managed MySQL, so we self-host it as a private service.
+  # Data persists on the attached disk.
+  - type: pserv
+    name: shop-mysql
+    runtime: image
+    image:
+      url: docker.io/library/mysql:8.0
+    plan: starter
+    disk:
+      name: shop-mysql-data
+      mountPath: /var/lib/mysql
+      sizeGB: 1
+    envVars:
+      - key: MYSQL_ROOT_PASSWORD
+        generateValue: true
+      - key: MYSQL_DATABASE
+        value: ecommerce
+      - key: MYSQL_USER
+        value: laravel
+      - key: MYSQL_PASSWORD
+        generateValue: true
+
+  - type: web
+    name: shop-app
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    plan: starter
+    healthCheckPath: /up
+    disk:
+      name: shop-uploads
+      mountPath: /var/www/html/storage/app/public
+      sizeGB: 1
+    envVars:
+      - key: APP_NAME
+        value: "المتجر"
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: "false"
+      - key: APP_KEY
+        generateValue: true
+      - key: APP_LOCALE
+        value: ar
+      - key: LOG_CHANNEL
+        value: stderr
+      - key: DB_CONNECTION
+        value: mysql
+      - key: DB_HOST
+        fromService:
+          type: pserv
+          name: shop-mysql
+          property: host
+      - key: DB_PORT
+        value: "3306"
+      - key: DB_DATABASE
+        value: ecommerce
+      - key: DB_USERNAME
+        value: laravel
+      - key: DB_PASSWORD
+        fromService:
+          type: pserv
+          name: shop-mysql
+          envVarKey: MYSQL_PASSWORD
+      - key: SESSION_DRIVER
+        value: database
+      - key: CACHE_STORE
+        value: database
+      - key: QUEUE_CONNECTION
+        value: database
+      - key: FILESYSTEM_DISK
+        value: public
+      - key: ADMIN_EMAIL
+        value: support@maharatnet.com
+      - key: ADMIN_PASSWORD
+        generateValue: true
+      - key: APP_URL
+        sync: false

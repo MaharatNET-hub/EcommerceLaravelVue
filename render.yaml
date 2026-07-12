@@ -1,39 +1,24 @@
 databases: []
 
+# Free-tier trial setup: a single Docker web service, no paid instances,
+# no persistent disks. Uses SQLite instead of MySQL because Render's paid
+# plans are required for any private service (so a self-hosted MySQL
+# service isn't possible on the free tier).
+#
+# IMPORTANT: with no persistent disk, all data (products, orders, uploaded
+# images) resets on every deploy AND whenever the free instance spins down
+# from inactivity and wakes back up. The demo seeder re-populates the shop
+# automatically on each start, so the site never appears empty — but real
+# orders/edits made between resets will be lost. Use this only for trying
+# things out; switch to the paid render.yaml setup for a real live store.
 services:
-  # Render has no managed MySQL, so we self-host it as a private service.
-  # Data persists on the attached disk.
-  - type: pserv
-    name: shop-mysql
-    runtime: image
-    image:
-      url: docker.io/library/mysql:8.0
-    plan: starter
-    disk:
-      name: shop-mysql-data
-      mountPath: /var/lib/mysql
-      sizeGB: 1
-    envVars:
-      - key: MYSQL_ROOT_PASSWORD
-        generateValue: true
-      - key: MYSQL_DATABASE
-        value: ecommerce
-      - key: MYSQL_USER
-        value: laravel
-      - key: MYSQL_PASSWORD
-        generateValue: true
-
   - type: web
     name: shop-app
     runtime: docker
     dockerfilePath: ./Dockerfile
     dockerContext: .
-    plan: starter
+    plan: free
     healthCheckPath: /up
-    disk:
-      name: shop-uploads
-      mountPath: /var/www/html/storage/app/public
-      sizeGB: 1
     envVars:
       - key: APP_NAME
         value: "المتجر"
@@ -48,23 +33,7 @@ services:
       - key: LOG_CHANNEL
         value: stderr
       - key: DB_CONNECTION
-        value: mysql
-      - key: DB_HOST
-        fromService:
-          type: pserv
-          name: shop-mysql
-          property: host
-      - key: DB_PORT
-        value: "3306"
-      - key: DB_DATABASE
-        value: ecommerce
-      - key: DB_USERNAME
-        value: laravel
-      - key: DB_PASSWORD
-        fromService:
-          type: pserv
-          name: shop-mysql
-          envVarKey: MYSQL_PASSWORD
+        value: sqlite
       - key: SESSION_DRIVER
         value: database
       - key: CACHE_STORE

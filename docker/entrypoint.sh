@@ -3,6 +3,12 @@ set -e
 
 cd /var/www/html
 
+if [ "$DB_CONNECTION" = "sqlite" ]; then
+    mkdir -p database
+    touch database/database.sqlite
+    chown -R www-data:www-data database
+fi
+
 php artisan storage:link || true
 php artisan config:cache
 php artisan route:cache
