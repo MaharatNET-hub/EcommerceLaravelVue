@@ -3,6 +3,7 @@ import { useForm } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import Tabs from '@/Components/Admin/Tabs.vue';
 import SeoFields from '@/Components/Admin/SeoFields.vue';
+import LocalizedField from '@/Components/Admin/LocalizedField.vue';
 import { resolveImage } from '@/helpers/format';
 
 defineOptions({ layout: AdminLayout });
@@ -12,23 +13,23 @@ const props = defineProps({ brand: Object });
 const isEdit = !!props.brand;
 
 const form = useForm({
-    name: props.brand?.name || '',
+    name: { ar: props.brand?.name?.ar || '', en: props.brand?.name?.en || '' },
     slug: props.brand?.slug || '',
-    description: props.brand?.description || '',
+    description: { ar: props.brand?.description?.ar || '', en: props.brand?.description?.en || '' },
     website: props.brand?.website || '',
     logo: null,
     is_active: props.brand?.is_active ?? true,
     sort_order: props.brand?.sort_order ?? 0,
     seo: {
-        meta_title: props.brand?.seo?.meta_title || '',
-        meta_description: props.brand?.seo?.meta_description || '',
-        meta_keywords: props.brand?.seo?.meta_keywords || '',
-        og_title: props.brand?.seo?.og_title || '',
-        og_description: props.brand?.seo?.og_description || '',
+        meta_title: { ar: props.brand?.seo?.meta_title?.ar || '', en: props.brand?.seo?.meta_title?.en || '' },
+        meta_description: { ar: props.brand?.seo?.meta_description?.ar || '', en: props.brand?.seo?.meta_description?.en || '' },
+        meta_keywords: { ar: props.brand?.seo?.meta_keywords?.ar || '', en: props.brand?.seo?.meta_keywords?.en || '' },
+        og_title: { ar: props.brand?.seo?.og_title?.ar || '', en: props.brand?.seo?.og_title?.en || '' },
+        og_description: { ar: props.brand?.seo?.og_description?.ar || '', en: props.brand?.seo?.og_description?.en || '' },
         og_image: props.brand?.seo?.og_image || '',
         canonical_url: props.brand?.seo?.canonical_url || '',
         robots: props.brand?.seo?.robots || 'index,follow',
-        focus_keyword: props.brand?.seo?.focus_keyword || '',
+        focus_keyword: { ar: props.brand?.seo?.focus_keyword?.ar || '', en: props.brand?.seo?.focus_keyword?.en || '' },
     },
 });
 
@@ -48,11 +49,13 @@ function submit() {
         <Tabs :tabs="['عام', 'SEO']">
             <template #عام>
                 <div class="space-y-4">
-                    <div>
-                        <label class="mb-1 block text-sm font-medium text-gray-700">الاسم</label>
-                        <input v-model="form.name" type="text" class="w-full rounded-lg border-gray-300" required />
-                        <p v-if="form.errors.name" class="mt-1 text-sm text-red-600">{{ form.errors.name }}</p>
-                    </div>
+                    <LocalizedField
+                        v-model="form.name"
+                        label="الاسم"
+                        :errors="form.errors"
+                        error-key-ar="name.ar"
+                        error-key-en="name.en"
+                    />
                     <div>
                         <label class="mb-1 block text-sm font-medium text-gray-700">الرابط المختصر (Slug)</label>
                         <input v-model="form.slug" type="text" class="w-full rounded-lg border-gray-300" />
@@ -61,10 +64,7 @@ function submit() {
                         <label class="mb-1 block text-sm font-medium text-gray-700">الموقع الإلكتروني</label>
                         <input v-model="form.website" type="text" class="w-full rounded-lg border-gray-300" />
                     </div>
-                    <div>
-                        <label class="mb-1 block text-sm font-medium text-gray-700">الوصف</label>
-                        <textarea v-model="form.description" rows="3" class="w-full rounded-lg border-gray-300"></textarea>
-                    </div>
+                    <LocalizedField v-model="form.description" label="الوصف" type="textarea" />
                     <div>
                         <label class="mb-1 block text-sm font-medium text-gray-700">الشعار</label>
                         <img v-if="brand?.logo" :src="resolveImage(brand.logo)" class="mb-2 h-16" />

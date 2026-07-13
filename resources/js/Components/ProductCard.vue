@@ -2,11 +2,13 @@
 import { Link, usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
 import { formatPrice, resolveImage } from '@/helpers/format';
+import { useTrans } from '@/composables/useTrans';
 
 const props = defineProps({
     product: { type: Object, required: true },
 });
 
+const { t } = useTrans();
 const page = usePage();
 const currencySymbol = computed(() => page.props.siteSettings?.currency_symbol || '$');
 
@@ -43,7 +45,7 @@ const discount = computed(() => {
                 v-if="product.stock_quantity === 0 && product.manage_stock"
                 class="absolute inset-0 flex items-center justify-center bg-black/40 text-sm font-semibold text-white"
             >
-                نفدت الكمية
+                {{ t('product.out_of_stock') }}
             </span>
         </div>
         <div class="p-3">

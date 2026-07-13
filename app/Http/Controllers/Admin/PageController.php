@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Concerns\SerializesTranslations;
 use App\Http\Controllers\Concerns\SyncsSeo;
 use App\Http\Controllers\Controller;
 use App\Models\Page;
@@ -13,7 +14,7 @@ use Inertia\Response;
 
 class PageController extends Controller
 {
-    use SyncsSeo;
+    use SerializesTranslations, SyncsSeo;
 
     public function index(Request $request): Response
     {
@@ -41,7 +42,7 @@ class PageController extends Controller
         $this->authorize('pages.create');
 
         $data = $this->validateData($request);
-        $data['slug'] = ($data['slug'] ?? null) ?: Str::slug($data['title']);
+        $data['slug'] = ($data['slug'] ?? null) ?: Str::slug($this->primaryLocaleValue($data['title']));
 
         $page = Page::create($data);
         $this->syncSeo($page, $request->input('seo'));
@@ -53,7 +54,7 @@ class PageController extends Controller
     {
         $this->authorize('pages.update');
 
-        return Inertia::render('Admin/Pages/Form', ['page' => $page->load('seo')]);
+        return Inertia::render('Admin/Pages/Form', ['page' => $this->withAllTranslations($page->load('seo'))]);
     }
 
     public function update(Request $request, Page $page): RedirectResponse
@@ -61,7 +62,7 @@ class PageController extends Controller
         $this->authorize('pages.update');
 
         $data = $this->validateData($request, $page->id);
-        $data['slug'] = ($data['slug'] ?? null) ?: Str::slug($data['title']);
+        $data['slug'] = ($data['slug'] ?? null) ?: Str::slug($this->primaryLocaleValue($data['title']));
 
         $page->update($data);
         $this->syncSeo($page, $request->input('seo'));
@@ -78,12 +79,19 @@ class PageController extends Controller
         return back()->with('success', 'تم حذف الصفحة.');
     }
 
+    private function primaryLocaleValue(array $translations): string
+    {
+        return $translations['ar'] ?? $translations['en'] ?? '';
+    }
+
     private function validateData(Request $request, ?int $ignoreId = null): array
     {
         return $request->validate([
-            'title' => ['required', 'string', 'max:255'],
+            'title.ar' => ['required', 'string', 'max:255'],
+            'title.en' => ['nullable', 'string', 'max:255'],
             'slug' => ['nullable', 'string', 'max:255', 'unique:pages,slug'.($ignoreId ? ",{$ignoreId}" : '')],
-            'content' => ['nullable', 'string'],
+            'content.ar' => ['nullable', 'string'],
+            'content.en' => ['nullable', 'string'],
             'is_active' => ['boolean'],
             'published_at' => ['nullable', 'date'],
             ...$this->seoValidationRules(),

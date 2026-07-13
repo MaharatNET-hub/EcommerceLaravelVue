@@ -29,15 +29,21 @@ trait SyncsSeo
     {
         return [
             'seo' => ['nullable', 'array'],
-            'seo.meta_title' => ['nullable', 'string', 'max:255'],
-            'seo.meta_description' => ['nullable', 'string', 'max:500'],
-            'seo.meta_keywords' => ['nullable', 'string', 'max:255'],
-            'seo.og_title' => ['nullable', 'string', 'max:255'],
-            'seo.og_description' => ['nullable', 'string', 'max:500'],
+            'seo.meta_title.ar' => ['nullable', 'string', 'max:255'],
+            'seo.meta_title.en' => ['nullable', 'string', 'max:255'],
+            'seo.meta_description.ar' => ['nullable', 'string', 'max:500'],
+            'seo.meta_description.en' => ['nullable', 'string', 'max:500'],
+            'seo.meta_keywords.ar' => ['nullable', 'string', 'max:255'],
+            'seo.meta_keywords.en' => ['nullable', 'string', 'max:255'],
+            'seo.og_title.ar' => ['nullable', 'string', 'max:255'],
+            'seo.og_title.en' => ['nullable', 'string', 'max:255'],
+            'seo.og_description.ar' => ['nullable', 'string', 'max:500'],
+            'seo.og_description.en' => ['nullable', 'string', 'max:500'],
             'seo.og_image' => ['nullable', 'string', 'max:255'],
             'seo.canonical_url' => ['nullable', 'string', 'max:255'],
             'seo.robots' => ['nullable', 'string', 'max:50'],
-            'seo.focus_keyword' => ['nullable', 'string', 'max:255'],
+            'seo.focus_keyword.ar' => ['nullable', 'string', 'max:255'],
+            'seo.focus_keyword.en' => ['nullable', 'string', 'max:255'],
         ];
     }
 }

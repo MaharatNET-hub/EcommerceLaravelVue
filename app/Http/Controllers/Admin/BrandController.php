@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Concerns\HandlesUploads;
+use App\Http\Controllers\Concerns\SerializesTranslations;
 use App\Http\Controllers\Concerns\SyncsSeo;
 use App\Http\Controllers\Controller;
 use App\Models\Brand;
@@ -14,7 +15,7 @@ use Inertia\Response;
 
 class BrandController extends Controller
 {
-    use HandlesUploads, SyncsSeo;
+    use HandlesUploads, SerializesTranslations, SyncsSeo;
 
     public function index(Request $request): Response
     {
@@ -47,7 +48,7 @@ class BrandController extends Controller
 
         $data = $this->validateData($request);
         $data['logo'] = $this->storeUpload($request->file('logo'), 'brands');
-        $data['slug'] = ($data['slug'] ?? null) ?: Str::slug($data['name']);
+        $data['slug'] = ($data['slug'] ?? null) ?: Str::slug($this->primaryLocaleValue($data['name']));
 
         $brand = Brand::create($data);
         $this->syncSeo($brand, $request->input('seo'));
@@ -59,7 +60,7 @@ class BrandController extends Controller
     {
         $this->authorize('brands.update');
 
-        return Inertia::render('Admin/Brands/Form', ['brand' => $brand->load('seo')]);
+        return Inertia::render('Admin/Brands/Form', ['brand' => $this->withAllTranslations($brand->load('seo'))]);
     }
 
     public function update(Request $request, Brand $brand): RedirectResponse
@@ -68,7 +69,7 @@ class BrandController extends Controller
 
         $data = $this->validateData($request, $brand->id);
         $data['logo'] = $this->replaceUpload($request->file('logo'), 'brands', $brand->logo);
-        $data['slug'] = ($data['slug'] ?? null) ?: Str::slug($data['name']);
+        $data['slug'] = ($data['slug'] ?? null) ?: Str::slug($this->primaryLocaleValue($data['name']));
 
         $brand->update($data);
         $this->syncSeo($brand, $request->input('seo'));
@@ -85,12 +86,19 @@ class BrandController extends Controller
         return back()->with('success', 'تم حذف البراند.');
     }
 
+    private function primaryLocaleValue(array $translations): string
+    {
+        return $translations['ar'] ?? $translations['en'] ?? '';
+    }
+
     private function validateData(Request $request, ?int $ignoreId = null): array
     {
         return $request->validate([
-            'name' => ['required', 'string', 'max:255'],
+            'name.ar' => ['required', 'string', 'max:255'],
+            'name.en' => ['nullable', 'string', 'max:255'],
             'slug' => ['nullable', 'string', 'max:255', 'unique:brands,slug'.($ignoreId ? ",{$ignoreId}" : '')],
-            'description' => ['nullable', 'string'],
+            'description.ar' => ['nullable', 'string'],
+            'description.en' => ['nullable', 'string'],
             'website' => ['nullable', 'string', 'max:255'],
             'logo' => ['nullable', 'image', 'max:4096'],
             'is_active' => ['boolean'],

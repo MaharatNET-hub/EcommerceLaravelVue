@@ -3,6 +3,7 @@ import { useForm } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import Tabs from '@/Components/Admin/Tabs.vue';
 import SeoFields from '@/Components/Admin/SeoFields.vue';
+import LocalizedField from '@/Components/Admin/LocalizedField.vue';
 import { resolveImage } from '@/helpers/format';
 
 defineOptions({ layout: AdminLayout });
@@ -15,23 +16,23 @@ const props = defineProps({
 const isEdit = !!props.category;
 
 const form = useForm({
-    name: props.category?.name || '',
+    name: { ar: props.category?.name?.ar || '', en: props.category?.name?.en || '' },
     slug: props.category?.slug || '',
     parent_id: props.category?.parent_id || '',
-    description: props.category?.description || '',
+    description: { ar: props.category?.description?.ar || '', en: props.category?.description?.en || '' },
     image: null,
     is_active: props.category?.is_active ?? true,
     sort_order: props.category?.sort_order ?? 0,
     seo: {
-        meta_title: props.category?.seo?.meta_title || '',
-        meta_description: props.category?.seo?.meta_description || '',
-        meta_keywords: props.category?.seo?.meta_keywords || '',
-        og_title: props.category?.seo?.og_title || '',
-        og_description: props.category?.seo?.og_description || '',
+        meta_title: { ar: props.category?.seo?.meta_title?.ar || '', en: props.category?.seo?.meta_title?.en || '' },
+        meta_description: { ar: props.category?.seo?.meta_description?.ar || '', en: props.category?.seo?.meta_description?.en || '' },
+        meta_keywords: { ar: props.category?.seo?.meta_keywords?.ar || '', en: props.category?.seo?.meta_keywords?.en || '' },
+        og_title: { ar: props.category?.seo?.og_title?.ar || '', en: props.category?.seo?.og_title?.en || '' },
+        og_description: { ar: props.category?.seo?.og_description?.ar || '', en: props.category?.seo?.og_description?.en || '' },
         og_image: props.category?.seo?.og_image || '',
         canonical_url: props.category?.seo?.canonical_url || '',
         robots: props.category?.seo?.robots || 'index,follow',
-        focus_keyword: props.category?.seo?.focus_keyword || '',
+        focus_keyword: { ar: props.category?.seo?.focus_keyword?.ar || '', en: props.category?.seo?.focus_keyword?.en || '' },
     },
 });
 
@@ -53,11 +54,13 @@ function submit() {
         <Tabs :tabs="['عام', 'SEO']">
             <template #عام>
                 <div class="space-y-4">
-                    <div>
-                        <label class="mb-1 block text-sm font-medium text-gray-700">الاسم</label>
-                        <input v-model="form.name" type="text" class="w-full rounded-lg border-gray-300" required />
-                        <p v-if="form.errors.name" class="mt-1 text-sm text-red-600">{{ form.errors.name }}</p>
-                    </div>
+                    <LocalizedField
+                        v-model="form.name"
+                        label="الاسم"
+                        :errors="form.errors"
+                        error-key-ar="name.ar"
+                        error-key-en="name.en"
+                    />
 
                     <div>
                         <label class="mb-1 block text-sm font-medium text-gray-700">الرابط المختصر (Slug)</label>
@@ -73,10 +76,7 @@ function submit() {
                         </select>
                     </div>
 
-                    <div>
-                        <label class="mb-1 block text-sm font-medium text-gray-700">الوصف</label>
-                        <textarea v-model="form.description" rows="3" class="w-full rounded-lg border-gray-300"></textarea>
-                    </div>
+                    <LocalizedField v-model="form.description" label="الوصف" type="textarea" />
 
                     <div>
                         <label class="mb-1 block text-sm font-medium text-gray-700">الصورة</label>

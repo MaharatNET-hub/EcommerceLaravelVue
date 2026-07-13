@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Concerns\HandlesUploads;
+use App\Http\Controllers\Concerns\SerializesTranslations;
 use App\Http\Controllers\Concerns\SyncsSeo;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
@@ -14,7 +15,7 @@ use Inertia\Response;
 
 class CategoryController extends Controller
 {
-    use HandlesUploads, SyncsSeo;
+    use HandlesUploads, SerializesTranslations, SyncsSeo;
 
     public function index(Request $request): Response
     {
@@ -51,7 +52,7 @@ class CategoryController extends Controller
 
         $data = $this->validateData($request);
         $data['image'] = $this->storeUpload($request->file('image'), 'categories');
-        $data['slug'] = ($data['slug'] ?? null) ?: Str::slug($data['name']);
+        $data['slug'] = ($data['slug'] ?? null) ?: Str::slug($this->primaryLocaleValue($data['name']));
 
         $category = Category::create($data);
         $this->syncSeo($category, $request->input('seo'));
@@ -64,7 +65,7 @@ class CategoryController extends Controller
         $this->authorize('categories.update');
 
         return Inertia::render('Admin/Categories/Form', [
-            'category' => $category->load('seo'),
+            'category' => $this->withAllTranslations($category->load('seo')),
             'parents' => Category::where('id', '!=', $category->id)->orderBy('name')->get(['id', 'name']),
         ]);
     }
@@ -75,7 +76,7 @@ class CategoryController extends Controller
 
         $data = $this->validateData($request, $category->id);
         $data['image'] = $this->replaceUpload($request->file('image'), 'categories', $category->image);
-        $data['slug'] = ($data['slug'] ?? null) ?: Str::slug($data['name']);
+        $data['slug'] = ($data['slug'] ?? null) ?: Str::slug($this->primaryLocaleValue($data['name']));
 
         $category->update($data);
         $this->syncSeo($category, $request->input('seo'));
@@ -92,13 +93,20 @@ class CategoryController extends Controller
         return back()->with('success', 'تم حذف التصنيف.');
     }
 
+    private function primaryLocaleValue(array $translations): string
+    {
+        return $translations['ar'] ?? $translations['en'] ?? '';
+    }
+
     private function validateData(Request $request, ?int $ignoreId = null): array
     {
         return $request->validate([
-            'name' => ['required', 'string', 'max:255'],
+            'name.ar' => ['required', 'string', 'max:255'],
+            'name.en' => ['nullable', 'string', 'max:255'],
             'slug' => ['nullable', 'string', 'max:255', 'unique:categories,slug'.($ignoreId ? ",{$ignoreId}" : '')],
             'parent_id' => ['nullable', 'exists:categories,id'],
-            'description' => ['nullable', 'string'],
+            'description.ar' => ['nullable', 'string'],
+            'description.en' => ['nullable', 'string'],
             'image' => ['nullable', 'image', 'max:4096'],
             'is_active' => ['boolean'],
             'sort_order' => ['nullable', 'integer'],

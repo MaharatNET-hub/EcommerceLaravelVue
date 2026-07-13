@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Concerns\SerializesTranslations;
 use App\Http\Controllers\Concerns\SyncsSeo;
 use App\Http\Controllers\Controller;
 use App\Models\Brand;
@@ -16,7 +17,7 @@ use Inertia\Response;
 
 class ProductController extends Controller
 {
-    use SyncsSeo;
+    use SerializesTranslations, SyncsSeo;
 
     public function index(Request $request): Response
     {
@@ -57,7 +58,7 @@ class ProductController extends Controller
         $this->authorize('products.create');
 
         $data = $this->validateData($request);
-        $data['slug'] = ($data['slug'] ?? null) ?: Str::slug($data['name']);
+        $data['slug'] = ($data['slug'] ?? null) ?: Str::slug($this->primaryLocaleValue($data['name']));
         unset($data['images']);
 
         $product = Product::create($data);
@@ -72,7 +73,7 @@ class ProductController extends Controller
         $this->authorize('products.update');
 
         return Inertia::render('Admin/Products/Form', [
-            'product' => $product->load(['seo', 'images', 'variants.attributeValues.attribute']),
+            'product' => $this->withAllTranslations($product->load(['seo', 'images', 'variants.attributeValues.attribute'])),
             'categories' => Category::orderBy('name')->get(['id', 'name']),
             'brands' => Brand::orderBy('name')->get(['id', 'name']),
             'attributes' => \App\Models\ProductAttribute::with('values')->orderBy('name')->get(),
@@ -84,7 +85,7 @@ class ProductController extends Controller
         $this->authorize('products.update');
 
         $data = $this->validateData($request, $product->id);
-        $data['slug'] = ($data['slug'] ?? null) ?: Str::slug($data['name']);
+        $data['slug'] = ($data['slug'] ?? null) ?: Str::slug($this->primaryLocaleValue($data['name']));
         unset($data['images']);
 
         $product->update($data);
@@ -135,16 +136,24 @@ class ProductController extends Controller
         }
     }
 
+    private function primaryLocaleValue(array $translations): string
+    {
+        return $translations['ar'] ?? $translations['en'] ?? '';
+    }
+
     private function validateData(Request $request, ?int $ignoreId = null): array
     {
         return $request->validate([
             'category_id' => ['nullable', 'exists:categories,id'],
             'brand_id' => ['nullable', 'exists:brands,id'],
-            'name' => ['required', 'string', 'max:255'],
+            'name.ar' => ['required', 'string', 'max:255'],
+            'name.en' => ['nullable', 'string', 'max:255'],
             'slug' => ['nullable', 'string', 'max:255', 'unique:products,slug'.($ignoreId ? ",{$ignoreId}" : '')],
             'sku' => ['required', 'string', 'max:100', 'unique:products,sku'.($ignoreId ? ",{$ignoreId}" : '')],
-            'description' => ['nullable', 'string'],
-            'short_description' => ['nullable', 'string', 'max:500'],
+            'description.ar' => ['nullable', 'string'],
+            'description.en' => ['nullable', 'string'],
+            'short_description.ar' => ['nullable', 'string', 'max:500'],
+            'short_description.en' => ['nullable', 'string', 'max:500'],
             'price' => ['required', 'numeric', 'min:0'],
             'sale_price' => ['nullable', 'numeric', 'min:0', 'lt:price'],
             'cost_price' => ['nullable', 'numeric', 'min:0'],

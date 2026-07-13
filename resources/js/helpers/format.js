@@ -12,10 +12,10 @@ export function resolveImage(path) {
     return path.startsWith('http') ? path : `/storage/${path}`;
 }
 
-export function formatDate(value) {
+export function formatDate(value, locale = 'ar') {
     if (!value) return '';
 
-    return new Date(value).toLocaleDateString('ar-EG', {
+    return new Date(value).toLocaleDateString(locale === 'en' ? 'en-US' : 'ar-EG', {
         year: 'numeric',
         month: 'long',
         day: 'numeric',

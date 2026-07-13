@@ -29,6 +29,12 @@ const resolvedOgImage = computed(() => {
 
 const resolvedCanonical = computed(() => props.canonicalUrl || window.location.href.split('?')[0]);
 
+function urlForLocale(locale) {
+    const segments = window.location.pathname.split('/');
+    segments[1] = locale;
+    return window.location.origin + segments.join('/');
+}
+
 const jsonLdArray = computed(() => {
     if (!props.jsonLd) return [];
     return Array.isArray(props.jsonLd) ? props.jsonLd : [props.jsonLd];
@@ -42,6 +48,9 @@ const jsonLdArray = computed(() => {
         <meta v-if="keywords" name="keywords" :content="keywords" />
         <meta name="robots" :content="robots" />
         <link rel="canonical" :href="resolvedCanonical" />
+        <link rel="alternate" hreflang="ar" :href="urlForLocale('ar')" />
+        <link rel="alternate" hreflang="en" :href="urlForLocale('en')" />
+        <link rel="alternate" hreflang="x-default" :href="urlForLocale('ar')" />
 
         <meta property="og:site_name" :content="siteName" />
         <meta property="og:type" content="website" />

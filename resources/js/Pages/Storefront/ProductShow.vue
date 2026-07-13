@@ -6,8 +6,11 @@ import Seo from '@/Components/Seo.vue';
 import ProductCard from '@/Components/ProductCard.vue';
 import StarRating from '@/Components/StarRating.vue';
 import { formatPrice, resolveImage } from '@/helpers/format';
+import { useTrans } from '@/composables/useTrans';
 
 defineOptions({ layout: StorefrontLayout });
+
+const { t } = useTrans();
 
 const props = defineProps({
     product: Object,
@@ -94,7 +97,7 @@ const jsonLd = computed(() => ({
 
     <div class="mx-auto max-w-7xl px-4 py-8">
         <nav class="mb-6 text-sm text-gray-500">
-            <Link :href="route('home')" class="hover:text-brand-600">الرئيسية</Link>
+            <Link :href="route('home')" class="hover:text-brand-600">{{ t('common.back_home') }}</Link>
             <span class="mx-1">/</span>
             <Link v-if="product.category" :href="route('categories.show', product.category.slug)" class="hover:text-brand-600">
                 {{ product.category.name }}
@@ -127,7 +130,7 @@ const jsonLd = computed(() => ({
 
                 <div class="mb-2 flex items-center gap-2">
                     <StarRating :rating="product.average_rating" />
-                    <span class="text-sm text-gray-500">({{ product.approved_reviews_count ?? product.reviews?.length ?? 0 }} تقييم)</span>
+                    <span class="text-sm text-gray-500">({{ product.approved_reviews_count ?? product.reviews?.length ?? 0 }} {{ t('product.reviews_count') }})</span>
                 </div>
 
                 <div class="mb-5 flex items-baseline gap-3">
@@ -164,24 +167,24 @@ const jsonLd = computed(() => ({
                         :disabled="cartForm.processing || (product.manage_stock && product.stock_quantity === 0)"
                         class="flex-1 rounded-lg bg-brand-600 py-3 font-semibold text-white transition hover:bg-brand-700 disabled:opacity-50"
                     >
-                        {{ product.manage_stock && product.stock_quantity === 0 ? 'نفدت الكمية' : 'أضف إلى السلة' }}
+                        {{ product.manage_stock && product.stock_quantity === 0 ? t('product.out_of_stock') : t('product.add_to_cart') }}
                     </button>
                 </div>
 
                 <div class="rounded-lg border border-gray-100 p-4 text-sm text-gray-500">
-                    <p>رمز المنتج: {{ product.sku }}</p>
-                    <p v-if="product.category">التصنيف: {{ product.category.name }}</p>
+                    <p>{{ t('product.sku') }}: {{ product.sku }}</p>
+                    <p v-if="product.category">{{ t('product.category') }}: {{ product.category.name }}</p>
                 </div>
             </div>
         </div>
 
         <div class="mt-12 max-w-3xl">
-            <h2 class="mb-3 text-xl font-bold text-gray-800">الوصف</h2>
+            <h2 class="mb-3 text-xl font-bold text-gray-800">{{ t('product.description') }}</h2>
             <div class="prose max-w-none text-gray-600" v-html="product.description"></div>
         </div>
 
         <div class="mt-12 max-w-3xl">
-            <h2 class="mb-4 text-xl font-bold text-gray-800">التقييمات</h2>
+            <h2 class="mb-4 text-xl font-bold text-gray-800">{{ t('product.reviews') }}</h2>
 
             <div v-if="product.approved_reviews?.length" class="mb-8 space-y-4">
                 <div v-for="review in product.approved_reviews" :key="review.id" class="rounded-lg border border-gray-100 p-4">
@@ -192,28 +195,28 @@ const jsonLd = computed(() => ({
                     <p class="text-sm text-gray-600">{{ review.comment }}</p>
                 </div>
             </div>
-            <p v-else class="mb-8 text-sm text-gray-500">لا توجد تقييمات بعد. كن أول من يقيم هذا المنتج.</p>
+            <p v-else class="mb-8 text-sm text-gray-500">{{ t('product.no_reviews') }}</p>
 
             <form v-if="isAuthenticated" @submit.prevent="submitReview" class="rounded-lg border border-gray-100 p-4">
-                <h3 class="mb-2 font-semibold text-gray-700">أضف تقييمك</h3>
+                <h3 class="mb-2 font-semibold text-gray-700">{{ t('product.add_review') }}</h3>
                 <select v-model="reviewForm.rating" class="mb-2 rounded-lg border-gray-300 text-sm">
-                    <option v-for="n in [5,4,3,2,1]" :key="n" :value="n">{{ n }} نجوم</option>
+                    <option v-for="n in [5,4,3,2,1]" :key="n" :value="n">{{ n }} {{ t('product.stars') }}</option>
                 </select>
                 <textarea
                     v-model="reviewForm.comment"
                     rows="3"
-                    placeholder="اكتب رأيك في المنتج..."
+                    :placeholder="t('product.comment_placeholder')"
                     class="mb-2 w-full rounded-lg border-gray-300 text-sm"
                 ></textarea>
-                <button type="submit" class="rounded-lg bg-gray-800 px-4 py-2 text-sm text-white hover:bg-gray-900">إرسال</button>
+                <button type="submit" class="rounded-lg bg-gray-800 px-4 py-2 text-sm text-white hover:bg-gray-900">{{ t('product.submit') }}</button>
             </form>
             <p v-else class="text-sm text-gray-500">
-                <Link :href="route('login')" class="text-brand-600">سجّل الدخول</Link> لإضافة تقييم.
+                <Link :href="route('login')" class="text-brand-600">{{ t('auth.log_in') }}</Link> {{ t('product.login_to_review') }}
             </p>
         </div>
 
         <div v-if="related.length" class="mt-12">
-            <h2 class="mb-4 text-xl font-bold text-gray-800">منتجات ذات صلة</h2>
+            <h2 class="mb-4 text-xl font-bold text-gray-800">{{ t('product.related') }}</h2>
             <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
                 <ProductCard v-for="p in related" :key="p.id" :product="p" />
             </div>

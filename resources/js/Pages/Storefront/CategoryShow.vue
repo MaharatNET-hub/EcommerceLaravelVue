@@ -5,8 +5,11 @@ import StorefrontLayout from '@/Layouts/StorefrontLayout.vue';
 import Seo from '@/Components/Seo.vue';
 import ProductCard from '@/Components/ProductCard.vue';
 import Pagination from '@/Components/Pagination.vue';
+import { useTrans } from '@/composables/useTrans';
 
 defineOptions({ layout: StorefrontLayout });
+
+const { t } = useTrans();
 
 const props = defineProps({
     category: Object,
@@ -39,7 +42,7 @@ const seo = props.category.seo;
 
     <div class="mx-auto max-w-7xl px-4 py-6">
         <nav class="mb-4 text-sm text-gray-500">
-            <Link :href="route('home')" class="hover:text-brand-600">الرئيسية</Link>
+            <Link :href="route('home')" class="hover:text-brand-600">{{ t('common.back_home') }}</Link>
             <template v-for="crumb in breadcrumbs" :key="crumb.slug">
                 <span class="mx-1">/</span>
                 <Link :href="route('categories.show', crumb.slug)" class="hover:text-brand-600">{{ crumb.name }}</Link>
@@ -62,39 +65,39 @@ const seo = props.category.seo;
         <div class="grid grid-cols-1 gap-8 lg:grid-cols-4">
             <aside class="space-y-6 lg:col-span-1">
                 <div>
-                    <h3 class="mb-2 font-semibold text-gray-800">البراند</h3>
+                    <h3 class="mb-2 font-semibold text-gray-800">{{ t('category.brand') }}</h3>
                     <select v-model="form.brand_id" @change="applyFilters" class="w-full rounded-lg border-gray-300 text-sm">
-                        <option value="">الكل</option>
+                        <option value="">{{ t('category.all') }}</option>
                         <option v-for="brand in brands" :key="brand.id" :value="brand.id">{{ brand.name }}</option>
                     </select>
                 </div>
                 <div>
-                    <h3 class="mb-2 font-semibold text-gray-800">نطاق السعر</h3>
+                    <h3 class="mb-2 font-semibold text-gray-800">{{ t('category.price_range') }}</h3>
                     <div class="flex items-center gap-2">
-                        <input v-model="form.min_price" type="number" placeholder="من" class="w-full rounded-lg border-gray-300 text-sm" />
-                        <input v-model="form.max_price" type="number" placeholder="إلى" class="w-full rounded-lg border-gray-300 text-sm" />
+                        <input v-model="form.min_price" type="number" :placeholder="t('category.from')" class="w-full rounded-lg border-gray-300 text-sm" />
+                        <input v-model="form.max_price" type="number" :placeholder="t('category.to')" class="w-full rounded-lg border-gray-300 text-sm" />
                     </div>
                     <button @click="applyFilters" class="mt-2 w-full rounded-lg bg-gray-800 py-1.5 text-sm text-white hover:bg-gray-900">
-                        تطبيق
+                        {{ t('category.apply') }}
                     </button>
                 </div>
             </aside>
 
             <div class="lg:col-span-3">
                 <div class="mb-4 flex items-center justify-between">
-                    <p class="text-sm text-gray-500">{{ products.total }} منتج</p>
+                    <p class="text-sm text-gray-500">{{ products.total }} {{ t('category.products_count') }}</p>
                     <select v-model="form.sort" @change="applyFilters" class="rounded-lg border-gray-300 text-sm">
-                        <option value="">الترتيب الافتراضي</option>
-                        <option value="newest">الأحدث</option>
-                        <option value="price_asc">السعر: من الأقل للأعلى</option>
-                        <option value="price_desc">السعر: من الأعلى للأقل</option>
+                        <option value="">{{ t('category.sort_default') }}</option>
+                        <option value="newest">{{ t('category.sort_newest') }}</option>
+                        <option value="price_asc">{{ t('category.sort_price_asc') }}</option>
+                        <option value="price_desc">{{ t('category.sort_price_desc') }}</option>
                     </select>
                 </div>
 
                 <div v-if="products.data.length" class="grid grid-cols-2 gap-4 sm:grid-cols-3">
                     <ProductCard v-for="product in products.data" :key="product.id" :product="product" />
                 </div>
-                <p v-else class="py-12 text-center text-gray-500">لا توجد منتجات مطابقة حالياً.</p>
+                <p v-else class="py-12 text-center text-gray-500">{{ t('category.no_products') }}</p>
 
                 <Pagination :links="products.links" />
             </div>

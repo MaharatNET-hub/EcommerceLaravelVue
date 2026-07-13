@@ -1,9 +1,11 @@
 <script setup>
 import { Link, router, usePage } from '@inertiajs/vue3';
-import { computed, ref, watch } from 'vue';
+import { computed, ref } from 'vue';
 import { resolveImage } from '@/helpers/format';
+import { useTrans } from '@/composables/useTrans';
 
 const page = usePage();
+const { t, locale } = useTrans();
 const site = computed(() => page.props.siteSettings);
 const categories = computed(() => page.props.navCategories || []);
 const footerPages = computed(() => page.props.footerPages || []);
@@ -17,6 +19,12 @@ const mobileMenuOpen = ref(false);
 
 function submitSearch() {
     router.get(route('search'), { q: search.value }, { preserveState: true });
+}
+
+function switchLocale(target) {
+    const segments = window.location.pathname.split('/');
+    segments[1] = target;
+    window.location.href = segments.join('/') + window.location.search;
 }
 
 const successMessage = computed(() => page.props.flash?.success);
@@ -53,7 +61,7 @@ const errorMessage = computed(() => page.props.flash?.error);
                         <input
                             v-model="search"
                             type="search"
-                            placeholder="ابحث عن منتج..."
+                            :placeholder="t('nav.search_placeholder')"
                             class="w-full rounded-full border-gray-300 py-2 ps-4 pe-10 text-sm focus:border-brand-500 focus:ring-brand-500"
                         />
                         <button type="submit" class="absolute inset-y-0 end-3 flex items-center text-gray-400">
@@ -65,6 +73,14 @@ const errorMessage = computed(() => page.props.flash?.error);
                 </form>
 
                 <div class="ms-auto flex items-center gap-4">
+                    <button
+                        type="button"
+                        @click="switchLocale(locale === 'ar' ? 'en' : 'ar')"
+                        class="rounded-full border border-gray-200 px-2.5 py-1 text-xs font-semibold text-gray-600 hover:border-brand-400 hover:text-brand-600"
+                    >
+                        {{ locale === 'ar' ? 'EN' : 'AR' }}
+                    </button>
+
                     <Link :href="route('cart.index')" class="relative">
                         <svg class="h-6 w-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
@@ -83,13 +99,13 @@ const errorMessage = computed(() => page.props.flash?.error);
                             <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
                         </button>
                         <div class="invisible absolute end-0 z-40 mt-2 w-48 rounded-lg border border-gray-100 bg-white py-1 opacity-0 shadow-lg transition group-hover:visible group-hover:opacity-100">
-                            <Link :href="route('orders.index')" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">طلباتي</Link>
-                            <Link :href="route('profile.edit')" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">الملف الشخصي</Link>
-                            <Link v-if="canAccessAdmin" :href="route('admin.dashboard')" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">لوحة التحكم</Link>
-                            <Link :href="route('logout')" method="post" as="button" class="block w-full px-4 py-2 text-start text-sm text-red-600 hover:bg-gray-50">تسجيل الخروج</Link>
+                            <Link :href="route('orders.index')" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">{{ t('nav.my_orders') }}</Link>
+                            <Link :href="route('profile.edit')" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">{{ t('nav.profile') }}</Link>
+                            <Link v-if="canAccessAdmin" :href="route('admin.dashboard')" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">{{ t('nav.admin_dashboard') }}</Link>
+                            <Link :href="route('logout')" method="post" as="button" class="block w-full px-4 py-2 text-start text-sm text-red-600 hover:bg-gray-50">{{ t('nav.logout') }}</Link>
                         </div>
                     </div>
-                    <Link v-else :href="route('login')" class="text-sm font-medium text-gray-700 hover:text-brand-600">تسجيل الدخول</Link>
+                    <Link v-else :href="route('login')" class="text-sm font-medium text-gray-700 hover:text-brand-600">{{ t('nav.login') }}</Link>
                 </div>
             </div>
 
@@ -103,7 +119,7 @@ const errorMessage = computed(() => page.props.flash?.error);
                     >
                         {{ category.name }}
                     </Link>
-                    <Link :href="route('brands.index')" class="font-medium text-gray-600 hover:text-brand-600">البراندات</Link>
+                    <Link :href="route('brands.index')" class="font-medium text-gray-600 hover:text-brand-600">{{ t('nav.brands') }}</Link>
                 </div>
             </nav>
 
@@ -117,7 +133,7 @@ const errorMessage = computed(() => page.props.flash?.error);
                     >
                         {{ category.name }}
                     </Link>
-                    <Link :href="route('brands.index')" class="py-1.5 font-medium text-gray-600">البراندات</Link>
+                    <Link :href="route('brands.index')" class="py-1.5 font-medium text-gray-600">{{ t('nav.brands') }}</Link>
                 </div>
             </nav>
         </header>
@@ -135,7 +151,7 @@ const errorMessage = computed(() => page.props.flash?.error);
                     <p v-if="site.email" class="mt-1 text-sm text-gray-500">{{ site.email }}</p>
                 </div>
                 <div>
-                    <h4 class="mb-3 font-semibold text-gray-800">روابط سريعة</h4>
+                    <h4 class="mb-3 font-semibold text-gray-800">{{ t('footer.quick_links') }}</h4>
                     <ul class="space-y-1.5 text-sm text-gray-500">
                         <li v-for="p in footerPages" :key="p.id">
                             <Link :href="route('pages.show', p.slug)">{{ p.title }}</Link>
@@ -143,23 +159,23 @@ const errorMessage = computed(() => page.props.flash?.error);
                     </ul>
                 </div>
                 <div>
-                    <h4 class="mb-3 font-semibold text-gray-800">الدعم</h4>
+                    <h4 class="mb-3 font-semibold text-gray-800">{{ t('footer.support') }}</h4>
                     <ul class="space-y-1.5 text-sm text-gray-500">
-                        <li><Link :href="route('cart.index')">سلة التسوق</Link></li>
-                        <li><Link :href="route('orders.index')">تتبع الطلب</Link></li>
+                        <li><Link :href="route('cart.index')">{{ t('footer.cart') }}</Link></li>
+                        <li><Link :href="route('orders.index')">{{ t('footer.track_order') }}</Link></li>
                     </ul>
                 </div>
                 <div>
-                    <h4 class="mb-3 font-semibold text-gray-800">تابعنا</h4>
+                    <h4 class="mb-3 font-semibold text-gray-800">{{ t('footer.follow_us') }}</h4>
                     <div class="flex gap-3 text-sm text-gray-500">
-                        <a v-if="site.facebook" :href="site.facebook" target="_blank" rel="noopener">فيسبوك</a>
-                        <a v-if="site.instagram" :href="site.instagram" target="_blank" rel="noopener">إنستغرام</a>
-                        <a v-if="site.whatsapp" :href="site.whatsapp" target="_blank" rel="noopener">واتساب</a>
+                        <a v-if="site.facebook" :href="site.facebook" target="_blank" rel="noopener">Facebook</a>
+                        <a v-if="site.instagram" :href="site.instagram" target="_blank" rel="noopener">Instagram</a>
+                        <a v-if="site.whatsapp" :href="site.whatsapp" target="_blank" rel="noopener">WhatsApp</a>
                     </div>
                 </div>
             </div>
             <div class="border-t border-gray-100 py-4 text-center text-xs text-gray-400">
-                © {{ new Date().getFullYear() }} {{ site.site_name }}. جميع الحقوق محفوظة.
+                © {{ new Date().getFullYear() }} {{ site.site_name }}. {{ t('footer.rights') }}
             </div>
         </footer>
     </div>

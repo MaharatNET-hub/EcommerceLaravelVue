@@ -3,6 +3,7 @@ import { useForm } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import Tabs from '@/Components/Admin/Tabs.vue';
 import SeoFields from '@/Components/Admin/SeoFields.vue';
+import LocalizedField from '@/Components/Admin/LocalizedField.vue';
 
 defineOptions({ layout: AdminLayout });
 
@@ -10,21 +11,21 @@ const props = defineProps({ page: Object });
 const isEdit = !!props.page;
 
 const form = useForm({
-    title: props.page?.title || '',
+    title: { ar: props.page?.title?.ar || '', en: props.page?.title?.en || '' },
     slug: props.page?.slug || '',
-    content: props.page?.content || '',
+    content: { ar: props.page?.content?.ar || '', en: props.page?.content?.en || '' },
     is_active: props.page?.is_active ?? true,
     published_at: props.page?.published_at?.slice(0, 16) || '',
     seo: {
-        meta_title: props.page?.seo?.meta_title || '',
-        meta_description: props.page?.seo?.meta_description || '',
-        meta_keywords: props.page?.seo?.meta_keywords || '',
-        og_title: props.page?.seo?.og_title || '',
-        og_description: props.page?.seo?.og_description || '',
+        meta_title: { ar: props.page?.seo?.meta_title?.ar || '', en: props.page?.seo?.meta_title?.en || '' },
+        meta_description: { ar: props.page?.seo?.meta_description?.ar || '', en: props.page?.seo?.meta_description?.en || '' },
+        meta_keywords: { ar: props.page?.seo?.meta_keywords?.ar || '', en: props.page?.seo?.meta_keywords?.en || '' },
+        og_title: { ar: props.page?.seo?.og_title?.ar || '', en: props.page?.seo?.og_title?.en || '' },
+        og_description: { ar: props.page?.seo?.og_description?.ar || '', en: props.page?.seo?.og_description?.en || '' },
         og_image: props.page?.seo?.og_image || '',
         canonical_url: props.page?.seo?.canonical_url || '',
         robots: props.page?.seo?.robots || 'index,follow',
-        focus_keyword: props.page?.seo?.focus_keyword || '',
+        focus_keyword: { ar: props.page?.seo?.focus_keyword?.ar || '', en: props.page?.seo?.focus_keyword?.en || '' },
     },
 });
 
@@ -44,19 +45,18 @@ function submit() {
         <Tabs :tabs="['المحتوى', 'SEO']">
             <template #المحتوى>
                 <div class="space-y-4">
-                    <div>
-                        <label class="mb-1 block text-sm font-medium text-gray-700">العنوان</label>
-                        <input v-model="form.title" type="text" class="w-full rounded-lg border-gray-300" required />
-                        <p v-if="form.errors.title" class="mt-1 text-sm text-red-600">{{ form.errors.title }}</p>
-                    </div>
+                    <LocalizedField
+                        v-model="form.title"
+                        label="العنوان"
+                        :errors="form.errors"
+                        error-key-ar="title.ar"
+                        error-key-en="title.en"
+                    />
                     <div>
                         <label class="mb-1 block text-sm font-medium text-gray-700">الرابط المختصر (Slug)</label>
                         <input v-model="form.slug" type="text" class="w-full rounded-lg border-gray-300" />
                     </div>
-                    <div>
-                        <label class="mb-1 block text-sm font-medium text-gray-700">المحتوى (HTML)</label>
-                        <textarea v-model="form.content" rows="10" class="w-full rounded-lg border-gray-300 font-mono text-sm"></textarea>
-                    </div>
+                    <LocalizedField v-model="form.content" label="المحتوى (HTML)" type="textarea" :rows="10" />
                     <label class="flex items-center gap-2 text-sm text-gray-700">
                         <input v-model="form.is_active" type="checkbox" class="rounded border-gray-300" /> منشورة
                     </label>

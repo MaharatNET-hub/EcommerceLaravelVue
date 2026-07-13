@@ -1,12 +1,16 @@
 <script setup>
+import { useTrans } from '@/composables/useTrans';
+
 defineProps({
     rating: { type: Number, default: 0 },
     size: { type: String, default: 'h-4 w-4' },
 });
+
+const { locale } = useTrans();
 </script>
 
 <template>
-    <div class="flex items-center gap-0.5" :aria-label="`${rating} من 5`">
+    <div class="flex items-center gap-0.5" :aria-label="locale === 'en' ? `${rating} of 5` : `${rating} من 5`">
         <svg
             v-for="star in 5"
             :key="star"

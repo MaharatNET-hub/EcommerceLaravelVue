@@ -4,8 +4,11 @@ import { computed } from 'vue';
 import StorefrontLayout from '@/Layouts/StorefrontLayout.vue';
 import Seo from '@/Components/Seo.vue';
 import { formatPrice, resolveImage } from '@/helpers/format';
+import { useTrans } from '@/composables/useTrans';
 
 defineOptions({ layout: StorefrontLayout });
+
+const { t } = useTrans();
 
 const props = defineProps({ cart: Object });
 
@@ -27,14 +30,14 @@ function removeItem(item) {
 </script>
 
 <template>
-    <Seo title="سلة التسوق" robots="noindex,follow" />
+    <Seo :title="t('cart.title')" robots="noindex,follow" />
 
     <div class="mx-auto max-w-5xl px-4 py-10">
-        <h1 class="mb-6 text-2xl font-extrabold text-gray-800">سلة التسوق</h1>
+        <h1 class="mb-6 text-2xl font-extrabold text-gray-800">{{ t('cart.title') }}</h1>
 
         <div v-if="!cart.items.length" class="rounded-xl border border-dashed border-gray-300 py-16 text-center">
-            <p class="mb-4 text-gray-500">سلتك فارغة حالياً.</p>
-            <Link :href="route('home')" class="rounded-lg bg-brand-600 px-6 py-2 text-white hover:bg-brand-700">تابع التسوق</Link>
+            <p class="mb-4 text-gray-500">{{ t('cart.empty') }}</p>
+            <Link :href="route('home')" class="rounded-lg bg-brand-600 px-6 py-2 text-white hover:bg-brand-700">{{ t('cart.continue_shopping') }}</Link>
         </div>
 
         <div v-else class="grid grid-cols-1 gap-8 lg:grid-cols-3">
@@ -63,21 +66,21 @@ function removeItem(item) {
                         <span class="w-6 text-center">{{ item.quantity }}</span>
                         <button @click="updateQuantity(item, item.quantity + 1)" class="h-8 w-8 rounded-full border text-gray-600">+</button>
                     </div>
-                    <button @click="removeItem(item)" class="text-sm text-red-500 hover:text-red-700">حذف</button>
+                    <button @click="removeItem(item)" class="text-sm text-red-500 hover:text-red-700">{{ t('cart.remove') }}</button>
                 </div>
             </div>
 
             <div class="h-fit rounded-xl border border-gray-100 p-6">
-                <h2 class="mb-4 text-lg font-bold text-gray-800">ملخص الطلب</h2>
+                <h2 class="mb-4 text-lg font-bold text-gray-800">{{ t('cart.order_summary') }}</h2>
                 <div class="mb-4 flex justify-between text-sm text-gray-600">
-                    <span>المجموع الفرعي</span>
+                    <span>{{ t('cart.subtotal') }}</span>
                     <span>{{ formatPrice(subtotal, currencySymbol) }}</span>
                 </div>
                 <Link
                     :href="route('checkout.create')"
                     class="block w-full rounded-lg bg-brand-600 py-3 text-center font-semibold text-white hover:bg-brand-700"
                 >
-                    إتمام الطلب
+                    {{ t('cart.checkout') }}
                 </Link>
             </div>
         </div>

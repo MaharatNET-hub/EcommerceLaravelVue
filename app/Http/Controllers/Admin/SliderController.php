@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Concerns\HandlesUploads;
+use App\Http\Controllers\Concerns\SerializesTranslations;
 use App\Http\Controllers\Controller;
 use App\Models\Slider;
 use Illuminate\Http\RedirectResponse;
@@ -12,7 +13,7 @@ use Inertia\Response;
 
 class SliderController extends Controller
 {
-    use HandlesUploads;
+    use HandlesUploads, SerializesTranslations;
 
     public function index(): Response
     {
@@ -47,7 +48,7 @@ class SliderController extends Controller
     {
         $this->authorize('sliders.update');
 
-        return Inertia::render('Admin/Sliders/Form', ['slider' => $slider]);
+        return Inertia::render('Admin/Sliders/Form', ['slider' => $this->withAllTranslations($slider)]);
     }
 
     public function update(Request $request, Slider $slider): RedirectResponse
@@ -75,11 +76,14 @@ class SliderController extends Controller
     private function validateData(Request $request, ?int $ignoreId = null): array
     {
         return $request->validate([
-            'title' => ['nullable', 'string', 'max:255'],
-            'subtitle' => ['nullable', 'string', 'max:255'],
+            'title.ar' => ['nullable', 'string', 'max:255'],
+            'title.en' => ['nullable', 'string', 'max:255'],
+            'subtitle.ar' => ['nullable', 'string', 'max:255'],
+            'subtitle.en' => ['nullable', 'string', 'max:255'],
             'image' => [$ignoreId ? 'nullable' : 'required', 'image', 'max:4096'],
             'mobile_image' => ['nullable', 'image', 'max:4096'],
-            'button_text' => ['nullable', 'string', 'max:100'],
+            'button_text.ar' => ['nullable', 'string', 'max:100'],
+            'button_text.en' => ['nullable', 'string', 'max:100'],
             'button_link' => ['nullable', 'string', 'max:255'],
             'sort_order' => ['nullable', 'integer'],
             'is_active' => ['boolean'],
